@@ -1,0 +1,11 @@
+{
+  "Version": 1,
+  "Rules": [
+    {
+      "Name": "allow-http",
+      "Action": "allow",
+      "Port": "80",
+      "Protocol": "tcp"
+    }
+  ]
+}

@@ -1,0 +1,10 @@
+{
+  "Version": 1,
+  "Servers": [
+    {
+      "ServerName": "app.local",
+      "Port": 80,
+      "ProxyPass": "http://localhost:3000"
+    }
+  ]
+}

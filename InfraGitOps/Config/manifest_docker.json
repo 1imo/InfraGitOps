@@ -1,0 +1,12 @@
+{
+  "Version": 1,
+  "Containers": [
+    {
+      "Name": "app-container",
+      "Image": "node:18",
+      "Ports": [
+        "3000:3000"
+      ]
+    }
+  ]
+}

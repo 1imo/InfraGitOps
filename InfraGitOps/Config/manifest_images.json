@@ -1,0 +1,10 @@
+{
+  "Version": 1,
+  "Images": [
+    {
+      "Name": "node-base",
+      "Repository": "node",
+      "Tag": "18-alpine"
+    }
+  ]
+}

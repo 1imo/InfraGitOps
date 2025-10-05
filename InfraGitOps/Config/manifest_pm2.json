@@ -1,0 +1,13 @@
+{
+  "Version": 1,
+  "Apps": [
+    {
+      "Name": "main-app",
+      "Script": "index.js",
+      "Instances": 2,
+      "Env": {
+        "NODE_ENV": "production"
+      }
+    }
+  ]
+}
