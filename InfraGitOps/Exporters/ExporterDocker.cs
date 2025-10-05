@@ -1,5 +1,7 @@
 using InfraGitOps.Interfaces;
 using InfraGitOps.Models;
+using System.Diagnostics;
+using System.Text.Json;
 
 namespace InfraGitOps.Exporters;
 
@@ -9,20 +11,63 @@ public class ExporterDocker : IExporter
 
     public async Task<object> ExportAsync()
     {
-        await Task.Delay(50);
-        
-        return new DockerManifest
+        var manifest = new DockerManifest
         {
             Version = 1,
-            Containers = new List<DockerContainer>
+            Containers = new List<DockerContainer>()
+        };
+
+        try
+        {
+            var output = await RunCommandAsync("docker", "ps --format \"{{.ID}}|{{.Names}}|{{.Image}}|{{.Ports}}\"");
+            
+            if (!string.IsNullOrWhiteSpace(output))
             {
-                new DockerContainer
+                var lines = output.Split('\n', StringSplitOptions.RemoveEmptyEntries);
+                foreach (var line in lines)
                 {
-                    Name = "app-container",
-                    Image = "node:18",
-                    Ports = new List<string> { "3000:3000" }
+                    var parts = line.Split('|');
+                    if (parts.Length >= 4)
+                    {
+                        manifest.Containers.Add(new DockerContainer
+                        {
+                            Name = parts[1],
+                            Image = parts[2],
+                            Ports = string.IsNullOrWhiteSpace(parts[3]) 
+                                ? new List<string>() 
+                                : new List<string> { parts[3] }
+                        });
+                    }
                 }
             }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ExporterDocker] Could not read Docker state: {ex.Message}");
+        }
+
+        return manifest;
+    }
+
+    private async Task<string> RunCommandAsync(string command, string arguments)
+    {
+        var startInfo = new ProcessStartInfo
+        {
+            FileName = command,
+            Arguments = arguments,
+            RedirectStandardOutput = true,
+            RedirectStandardError = true,
+            UseShellExecute = false,
+            CreateNoWindow = true
         };
+
+        using var process = Process.Start(startInfo);
+        if (process == null)
+            return string.Empty;
+
+        var output = await process.StandardOutput.ReadToEndAsync();
+        await process.WaitForExitAsync();
+        
+        return process.ExitCode == 0 ? output : string.Empty;
     }
 }
